@@ -6,6 +6,7 @@ from hvac_main.pipeline.prompt_builder import build_prompt
 from hvac_main.pipeline.answerer import get_structured_answer
 from pathlib import Path
 import os
+import json
 
 router = APIRouter(prefix="/api/chat", tags=["AI Chat"])
 
@@ -59,7 +60,25 @@ async def chat_endpoint(req: ChatRequest):
     # 3. Build Prompt (IoT Context + History + Manual Chunks)
     messages = build_prompt(req.query, chunks, iot_context=iot_context, history_context=history_context)
 
-    # 4. Get LLM Answer (Structured Diagnostic)
+    # 4. Find Associated Images
+    associated_images = []
+    try:
+        images_meta_path = Path("hvac_main/images/images_metadata.json")
+        if images_meta_path.exists():
+            all_images = json.loads(images_meta_path.read_text(encoding="utf-8"))
+            # Get pages from retrieved chunks
+            target_pages = set(c["page"] for c in chunks if c.get("page"))
+            for img in all_images:
+                if img["page"] in target_pages:
+                    # Construct URL
+                    associated_images.append({
+                        "url": f"http://localhost:8000/images/{img['filename']}",
+                        "page": img["page"]
+                    })
+    except Exception as e:
+        print(f"Image linking error: {e}")
+
+    # 5. Get LLM Answer
     try:
         answer = get_structured_answer(messages)
     except Exception as e:
@@ -69,6 +88,7 @@ async def chat_endpoint(req: ChatRequest):
         "status": "success",
         "device_id": req.device_id,
         "diagnosis": answer,
+        "images": associated_images[:3], # Limit to top 3 relevant images
         "sources": [
             {
                 "chunk_id": c["chunk_id"],

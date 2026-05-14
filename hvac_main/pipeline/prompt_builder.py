@@ -55,7 +55,8 @@ def build_prompt(query: str, chunks: list[dict[str, Any]], iot_context: str | No
         user_message += f"--- MAINTENANCE HISTORY ---\n{history_context}\n\n"
     
     user_message += f"--- TECHNICAL MANUAL EXCERPTS ---\n{manual_context}\n\n"
-    user_message += f"QUESTION/ISSUE: {query}"
+    user_message += f"QUESTION/ISSUE: {query}\n\n"
+    user_message += "CRITICAL: You MUST respond with a valid JSON object matching the schema provided in the system instructions. Do not include any text before or after the JSON."
 
     return [
         {"role": "system", "content": SYSTEM_PROMPT},

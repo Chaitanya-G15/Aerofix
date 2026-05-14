@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppHeader } from "@/components/AppHeader";
+import ChatInterface from "@/components/ChatInterface";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +32,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-zinc-950 text-zinc-100">
         <AppHeader />
         <main className="flex-1">{children}</main>
+        <ChatInterface />
         <footer className="border-t border-zinc-800/60 py-6 text-center text-xs text-zinc-600">
           Connected to AeroFix FastAPI · Supabase IoT data
         </footer>

@@ -2,6 +2,7 @@ import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from routes.logs import router as logs_router
 from routes.analytics import router as analytics_router
@@ -28,6 +29,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/images", StaticFiles(directory="hvac_main/images"), name="images")
 
 app.include_router(logs_router)
 app.include_router(analytics_router)
