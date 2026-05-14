@@ -25,10 +25,11 @@ export default function ChatInterface() {
       try {
         const deviceIdMatch = pathname.match(/\/devices\/([^/]+)/);
         const deviceId = deviceIdMatch ? decodeURIComponent(deviceIdMatch[1]) : "";
-        const url = `http://localhost:8000/api/chat/history?user_id=demo_tech${deviceId ? `&device_id=${deviceId}` : ""}`;
+        const url = `http://127.0.0.1:8000/api/chat/history?user_id=demo_tech${deviceId ? `&device_id=${deviceId}` : ""}`;
         
         const res = await fetch(url);
-        const data = await res.data || await res.json();
+        if (!res.ok) throw new Error("History fetch failed");
+        const data = await res.json();
         
         if (Array.isArray(data) && data.length > 0) {
           const historyMessages = data.map((msg: any) => ({
@@ -57,7 +58,7 @@ export default function ChatInterface() {
       const deviceIdMatch = pathname.match(/\/devices\/([^/]+)/);
       const deviceId = deviceIdMatch ? decodeURIComponent(deviceIdMatch[1]) : null;
 
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch("http://127.0.0.1:8000/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: userMsg, device_id: deviceId }),

@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,6 +21,8 @@ export default function LoginPage() {
       router.push("/");
     }
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
