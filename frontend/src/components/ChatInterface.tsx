@@ -19,6 +19,32 @@ export default function ChatInterface() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
+  // Load history on mount
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const deviceIdMatch = pathname.match(/\/devices\/([^/]+)/);
+        const deviceId = deviceIdMatch ? decodeURIComponent(deviceIdMatch[1]) : "";
+        const url = `http://localhost:8000/api/chat/history?user_id=demo_tech${deviceId ? `&device_id=${deviceId}` : ""}`;
+        
+        const res = await fetch(url);
+        const data = await res.data || await res.json();
+        
+        if (Array.isArray(data) && data.length > 0) {
+          const historyMessages = data.map((msg: any) => ({
+            role: msg.role,
+            content: msg.content
+          }));
+          setMessages(historyMessages);
+        }
+      } catch (err) {
+        console.error("Failed to load chat history", err);
+      }
+    };
+    
+    fetchHistory();
+  }, [pathname]);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 

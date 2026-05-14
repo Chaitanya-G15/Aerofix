@@ -13,6 +13,16 @@ router = APIRouter(prefix="/api/chat", tags=["AI Chat"])
 class ChatRequest(BaseModel):
     query: str
     device_id: str | None = None
+    user_id: str | None = "demo_tech"
+
+@router.get("/history")
+async def get_history(user_id: str = "demo_tech", device_id: str | None = None):
+    query = supabase.table("ai_chat_history").select("*").eq("user_id", user_id)
+    if device_id:
+        query = query.eq("device_id", device_id)
+    
+    res = query.order("created_at", desc=False).limit(50).execute()
+    return res.data
 
 @router.post("")
 async def chat_endpoint(req: ChatRequest):
@@ -81,6 +91,14 @@ async def chat_endpoint(req: ChatRequest):
     # 5. Get LLM Answer
     try:
         answer = get_structured_answer(messages)
+        
+        # Save to History
+        history_data = [
+            {"user_id": req.user_id, "device_id": req.device_id, "role": "user", "content": req.query},
+            {"user_id": req.user_id, "device_id": req.device_id, "role": "ai", "content": answer}
+        ]
+        supabase.table("ai_chat_history").insert(history_data).execute()
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"LLM Generation failed: {str(e)}")
     

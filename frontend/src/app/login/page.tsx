@@ -10,9 +10,10 @@ export default function LoginPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login - in a real app, this would check Supabase Auth
+    // Simulate login session
     if (email && password) {
-      router.push("/devices");
+      document.cookie = "aerofix_session=true; path=/; max-age=86400"; // 24 hour session
+      router.push("/");
     }
   };
 
